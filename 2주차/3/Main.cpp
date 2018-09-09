@@ -86,7 +86,6 @@ int main() {
     }
 #endif
     
-
     xStartIter = xStart.begin();
     xEndIter = xEnd.begin();
     i = xStartIter->x1;
@@ -121,13 +120,7 @@ int main() {
 #endif
             activeRectangles.erase(i);
             xEndIter++;
-        }/*
-        if(xEndIter != xEnd.end() && xEndIter->x2 == i){ // 기존 사각형의 마지막
-            if(DEBUG) fprintf(stderr, "x=%d 사각형 마지막\n", i);
-            haveChanged = true;
-        }*/
-
-        // 사각형에 변화 생기면 높이 다시 계산하고 지금까지의 넓이 더함
+        }
 #if DEBUG
         if(DEBUG) fprintf(stderr, "x=%d 에서 검사중\n", i);
 #endif
