@@ -12,7 +12,6 @@
 
 #define DEBUG 0
 
-
 using namespace std;
 
 typedef struct _rectangle {
@@ -25,16 +24,7 @@ typedef struct _rectangle {
 typedef struct _line {
     int y1;
     int y2;
-    //int length;
 } Line;
-
-typedef struct _disjointLine {
-    int y1;
-    int y2;
-    int length;
-    multimap<int, Line> lines;
-} DisjointLine;
-
 
 bool rectagleCompare(Rectangle a, Rectangle b) {
     if (a.x1 >= 0 && a.x1 != b.x1) {
@@ -50,10 +40,8 @@ bool rectagleCompare(Rectangle a, Rectangle b) {
 }
 
 vector<Rectangle> xStart, xEnd;
-vector<int> xAll;
 vector<Rectangle>::iterator xStartIter, xEndIter;
-//map<int, DisjointLine> disjointLinesStart;
-//map<int, DisjointLine> disjointLinesEnd;
+vector<int> xAll;
 multimap<int, Line> activeRectangles;
 
 int main() {
@@ -85,6 +73,7 @@ int main() {
     vector<int>::iterator it = unique(xAll.begin(), xAll.end());
     xAll.resize(distance(xAll.begin(), it));
     
+#if DEBUG
     if(DEBUG) fprintf(stderr, "정렬 완료\n");
 
     if(DEBUG) {
@@ -95,18 +84,29 @@ int main() {
        cout << Rectangl.x1 << " " << Rectangl.x2 << " " << Rectangl.y1 << " " << Rectangl.y2 << endl;
     }
     }
+#endif
     
 
     xStartIter = xStart.begin();
     xEndIter = xEnd.begin();
-    int maxX = (--(xEnd.end()))->x2;
+    i = xStartIter->x1;
 
     // 가장 작은 x1부터 가장 큰 x2(=maxX)까지 x = i인 직선들에 대해 사각형과의 겹치는 높이 조사
     for(it = xAll.begin(); it != xAll.end(); it++) {
-        oldX = i;
+        deltaX = *it - i;
         i = *it;
+
+        // 넓이 더하기 =======================================
+        
+#if DEBUG
+        if(DEBUG) fprintf(stderr, "x=%d 현재 넓이 %lld + %lld | deltaX = %d, height = %d\n", i, size, (uint64_t) height * (uint64_t) deltaX, deltaX, height);
+#endif
+        size += (uint64_t) height * (uint64_t) deltaX; // add size
+
         while(xStartIter != xStart.end() && xStartIter->x1 == i){ // 새로운 사각형 추가
+#if DEBUG
             if(DEBUG) fprintf(stderr, "x=%d 사각형 시작 %d->%d\n", i, xStartIter->y1, xStartIter->y2);
+#endif
             activeRectangles.insert(
                 pair<int, Line>(
                     xStartIter->x2,
@@ -116,7 +116,9 @@ int main() {
             xStartIter++;
         }
         while(xEndIter != xEnd.end() && xEndIter->x2 == i){ // 기존 사각형 제거
+#if DEBUG
             if(DEBUG) fprintf(stderr, "x=%d 사각형 마지막\n", i);
+#endif
             activeRectangles.erase(i);
             xEndIter++;
         }/*
@@ -126,11 +128,13 @@ int main() {
         }*/
 
         // 사각형에 변화 생기면 높이 다시 계산하고 지금까지의 넓이 더함
+#if DEBUG
         if(DEBUG) fprintf(stderr, "x=%d 에서 검사중\n", i);
+#endif
         // 높이 다시 계산 ===================================
         priority_queue<int> yStart; // values should be negated
         priority_queue<int> yEnd; // values should be negated
-        newHeight = 0;
+        height = 0;
         linecnt = 0;
         newLinecnt = 0;
         int fragmentStart;
@@ -146,7 +150,9 @@ int main() {
 
         // 모든 사각형에 대해서 검사
         while(!(yStart.empty() && yEnd.empty())){
+#if DEBUG
             if(DEBUG) fprintf(stderr, "x=%d 에서 yStart=%d, yEnd=%d\n", i, yStart.top(), yEnd.top());
+#endif
             if(!yStart.empty() && yStart.top() > yEnd.top()){
                 newLinecnt++;
                 if (linecnt == 0)
@@ -155,19 +161,12 @@ int main() {
             } else {
                 newLinecnt--;
                 if (newLinecnt == 0)
-                    newHeight += fragmentStart - yEnd.top();
+                    height += fragmentStart - yEnd.top();
                 yEnd.pop();
             }
             linecnt = newLinecnt;
         }
 
-        if(DEBUG) fprintf(stderr, "x=%d 에서 길이 %d, 기존 길이 %d, 델타X %d\n", i, newHeight, height, deltaX);
-
-        // 넓이 더하기 =======================================
-        deltaX = i - oldX;
-        size += (uint64_t) height * (uint64_t) deltaX; // add size
-        if(DEBUG) fprintf(stderr, "현재 넓이 %d\n", size);
-        height = newHeight;
     }
 
     cout << size;
