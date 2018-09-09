@@ -90,7 +90,7 @@ int main() {
     xEndIter = xEnd.begin();
     i = xStartIter->x1;
 
-    // 가장 작은 x1부터 가장 큰 x2(=maxX)까지 x = i인 직선들에 대해 사각형과의 겹치는 높이 조사
+    // 가장 작은 x1부터 가장 큰 x2까지 x = i인 직선들에 대해 사각형과의 겹치는 높이 조사
     for(it = xAll.begin(); it != xAll.end(); it++) {
         deltaX = *it - i;
         i = *it;
@@ -134,9 +134,11 @@ int main() {
 
         // 현재 x값에 해당하는 사각형들의 y값들을 정렬
         for(multimap<int, Line>::iterator it=activeRectangles.begin(); it!=activeRectangles.end(); ++it){
+#if DEBUG
             if(DEBUG) {
                 cout << it->first << " " << it->second.y1 << " " << it->second.y2 << endl;
             }
+#endif
             yStart.push(-(it->second.y1));
             yEnd.push(-(it->second.y2));
         }
