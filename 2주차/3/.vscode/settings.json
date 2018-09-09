@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.js": "javascriptreact",
+        "__tree": "cpp",
+        "deque": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "ios": "cpp",
+        "iostream": "cpp"
+    }
+}

@@ -1,0 +1,6 @@
+ALL = main
+
+all : $(ALL)
+
+main : Main.cpp
+	g++-7 -Wall -lm -static -DEVAL -o Main -O2 Main.cpp -std=c++11
