@@ -43,19 +43,19 @@ vector<Rectangle> xStart, xEnd;
 vector<Rectangle>::iterator xStartIter, xEndIter;
 vector<int> xAll;
 multimap<int, Line> activeRectangles;
+priority_queue<int> yStart; // values should be negated
+priority_queue<int> yEnd; // values should be negated
 
 int main() {
     int n, x1, x2, y1, y2, i;
     int deltaX = 0;
-    int oldX;
     int height = 0;
-    int newHeight = 0;
-    int linecnt, newLinecnt;
+    int linecnt;
     uint64_t size = 0;
-    bool haveChanged;
+    int fragmentStart = -1;
 
     cin >> n;
-
+    
     for(int i = 0; i < n; i++) {
         cin >> x1 >> x2 >> y1 >> y2;
 
@@ -125,12 +125,8 @@ int main() {
         if(DEBUG) fprintf(stderr, "x=%d 에서 검사중\n", i);
 #endif
         // 높이 다시 계산 ===================================
-        priority_queue<int> yStart; // values should be negated
-        priority_queue<int> yEnd; // values should be negated
         height = 0;
         linecnt = 0;
-        newLinecnt = 0;
-        int fragmentStart;
 
         // 현재 x값에 해당하는 사각형들의 y값들을 정렬
         for(multimap<int, Line>::iterator it=activeRectangles.begin(); it!=activeRectangles.end(); ++it){
@@ -149,17 +145,16 @@ int main() {
             if(DEBUG) fprintf(stderr, "x=%d 에서 yStart=%d, yEnd=%d\n", i, yStart.top(), yEnd.top());
 #endif
             if(!yStart.empty() && yStart.top() > yEnd.top()){
-                newLinecnt++;
                 if (linecnt == 0)
                     fragmentStart = yStart.top();
+                linecnt++;
                 yStart.pop();
             } else {
-                newLinecnt--;
-                if (newLinecnt == 0)
+                linecnt--;
+                if (linecnt == 0)
                     height += fragmentStart - yEnd.top();
                 yEnd.pop();
             }
-            linecnt = newLinecnt;
         }
 
     }
