@@ -146,19 +146,19 @@ typedef struct _disjointLine {
 > 1. 현재 x값에서 존재하는 사각형들에 대해서, `y1`과 `y2`들을 각각 `yStart`와 `yEnd`, 두 개의 *min Heap*에 넣는다. (오름차순 정렬)
 > 2. 두 *heap*이 모두 빌 때 까지 아래 코드를 반복한다. `linecnt`와 `newLinecnt`는 0으로 초기화되어 있다. 주의할 점은 *max Heap*으로 *min Heap*을 흉내내기 위해 모든 y값들은 음수로 바뀌어 들어가 있다.
 > ```c++
-while(!(yStart.empty() && yEnd.empty())){
-    if(!yStart.empty() && yStart.top() > yEnd.top()){
-	if (linecnt == 0)
-	    fragmentStart = yStart.top();
-	linecnt++;
-	yStart.pop();
-    } else {
-	linecnt--;
-	if (linecnt == 0)
-	    height += fragmentStart - yEnd.top();
-	yEnd.pop();
-    }
-}
+> while(!(yStart.empty() && yEnd.empty())){
+>     if(!yStart.empty() && yStart.top() > yEnd.top()){
+> 	if (linecnt == 0)
+> 	    fragmentStart = yStart.top();
+> 	linecnt++;
+> 	yStart.pop();
+>    } else {
+>	linecnt--;
+>	if (linecnt == 0)
+>	    height += fragmentStart - yEnd.top();
+>	yEnd.pop();
+>    }
+>}
 > ``` 
 > ![그림 4](./4.png)
 > 
