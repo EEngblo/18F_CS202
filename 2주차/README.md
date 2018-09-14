@@ -146,21 +146,19 @@ typedef struct _disjointLine {
 > 1. 현재 x값에서 존재하는 사각형들에 대해서, `y1`과 `y2`들을 각각 `yStart`와 `yEnd`, 두 개의 *min Heap*에 넣는다. (오름차순 정렬)
 > 2. 두 *heap*이 모두 빌 때 까지 아래 코드를 반복한다. `linecnt`와 `newLinecnt`는 0으로 초기화되어 있다. 주의할 점은 *max Heap*으로 *min Heap*을 흉내내기 위해 모든 y값들은 음수로 바뀌어 들어가 있다.
 > ```c++
-> if(!yStart.empty() && yStart.top() > yEnd.top()){
->   // 현재 사각형의 끝보다 다음 사각형의 시작이 가까울 때:
->   if (linecnt == 0) // 원래 중첩이 하나도 안 되어 있었다면
->       fragmentStart = yStart.top(); // 이 사각형의 시작이 이 선분의 시작이다
->   linecnt++; // 사각형의 중첩 정도를 높인다.
->
->   yStart.pop();
-> } else {
->   // 현재 사각형의 끝이 다음 사각형의 시작보다 가깝다면
->   newLinecnt--; // 중첩 정도를 낮춘다
->   if (newLinecnt == 0) // 이제 하나도 중첩이 안 되어있다면
->       height += fragmentStart - yEnd.top(); // disjoint한 선분은 여기가 끝이고 그 길이는 이 점과 선분의 시작(fragmentStart) 사이의 차이다.
->   yEnd.pop();
-> }
-> linecnt = newLinecnt;
+while(!(yStart.empty() && yEnd.empty())){
+    if(!yStart.empty() && yStart.top() > yEnd.top()){
+	if (linecnt == 0)
+	    fragmentStart = yStart.top();
+	linecnt++;
+	yStart.pop();
+    } else {
+	linecnt--;
+	if (linecnt == 0)
+	    height += fragmentStart - yEnd.top();
+	yEnd.pop();
+    }
+}
 > ``` 
 > ![그림 4](./4.png)
 > 
