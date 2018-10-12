@@ -1,18 +1,6 @@
 {
     "files.associations": {
         "*.js": "javascriptreact",
-        "__split_buffer": "cpp",
-        "deque": "cpp",
-        "iterator": "cpp",
-        "map": "cpp",
-        "queue": "cpp",
-        "set": "cpp",
-        "string": "cpp",
-        "string_view": "cpp",
-        "vector": "cpp",
-        "iostream": "cpp",
-        "algorithm": "cpp",
-        "chrono": "cpp",
-        "limits": "cpp"
+        "iostream": "cpp"
     }
 }
