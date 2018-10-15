@@ -8,148 +8,100 @@
 #include <functional>
 #include <set>
 #include <string>
-
-#define m 987654321
-#define sum(X, Y) (((X % m) + (Y % m)) % m)
-#define sub(X, Y) (((X % m) - (Y % m) + m) % m)
-#define mul(X, Y) (((uint64_t) (X % m) * (Y % m)) % m)
-#define div(X, Y) (((X % m) / (Y % m)) % m)
+#define DEBUG 0
 
 using namespace std;
 
-// n C r = (n-1) C (r-1) + (n-1) C r // 2차원 배열 이용해서 DP
-// binom[n][r] = binom[n-1][r-1] + binom[n-1][r]
-uint32_t binom(uint32_t n, uint32_t r){
-    uint32_t** binom = (uint32_t **) calloc((n+1)*(r+1), sizeof(uint32_t));
-    for (int i = 0; i <= r; i++) binom[0][i] = 0;
-    for (int i = 1; i <= n; i++){
-        binom[i][0] = i;
-        for (int j = 1; j <= r; j++){
-            binom[i][j] = sum(binom[i-1][j], binom[i-1][j-1]);
-        }
-    }
-    return binom[n][r];
-}
+typedef struct _ComputerOrTask {
+    int32_t r;
+    int32_t price;
+    int32_t core; 
+    bool isComputer;
+} ComputerOrTask;
 
+vector<ComputerOrTask> A;
 
-// use mtrx
-uint32_t* matmul(uint32_t* A, uint32_t* B, uint32_t size){
-    uint32_t* C = (uint32_t *) calloc(size*size, sizeof(uint32_t));
-    for(int i = 0; i < size; i++){
-        for(int j = 0; j < size; j++){
-            for(int k = 0; k < size; k++){
-                *(C + size*i + j) = sum(mul(*(A + size*i + k), *(B + size*k + j)), *(C + size*i + j));
-            }
-        }
+bool compareComputer(const ComputerOrTask& a, const ComputerOrTask& b){
+    if (a.r == b.r){
+        return a.isComputer < b.isComputer;
     }
-    return C;
-}
-
-uint32_t* matsum(uint32_t* A, uint32_t* B, uint32_t size){
-    uint32_t* C = (uint32_t *) malloc(size*size*sizeof(uint32_t));
-    for(int i = 0; i < size; i++){
-        for(int j = 0; j < size; j++){
-            //cout << *(A + size*i + j) << " " << *(B + size*i + j) << endl;
-            *(C + size*i + j) = sum(*(A + size*i + j), *(B + size*i + j));
-        }
-    }
-    return C;
-}
-
-uint32_t pow(uint32_t n, uint64_t k){
-    if (k == 1) return n % m;
-    uint32_t a = pow(n, k >> 1);
-    if (k & 1){
-        return mul(n, mul(a, a));
-    }
-    return mul(a, a);
-}
-
-uint32_t* matpow(uint32_t* n, uint64_t k, uint32_t size){
-    if (k == 1) {
-        for(int i = 0; i < size ; i++){
-            for(int j = 0; j < size; j++){
-                *(n + size*i + j) %= m;
-            }
-        }
-        return n;
-    }
-    uint32_t* a = matpow(n, k >> 1, size);
-    if (k & 1){
-        return matmul(n, matmul(a, a, size), size);
-    }
-    return matmul(a, a, size);
-}
-
-uint32_t powsum(uint32_t n, uint64_t k){
-    uint32_t answer;
-    if (k == 0) answer = 1;
-    else if (k == 1) answer = n + 1;
-    else if (k & 1) {
-        uint32_t a = sum(1, pow(n, (k+1) >> 1));
-        uint32_t b = powsum(n, (uint64_t) k>> 1);
-        answer = mul(a, b);
-    }
-    else {
-        uint32_t a = pow(n, k);
-        uint32_t b = powsum(n, (k -1));
-        answer = sum(a, b);
-    }
-    return answer;
-}
-
-uint32_t* powsum(uint32_t* n, uint64_t k, uint32_t size){
-    uint32_t* C = (uint32_t *) malloc(size*size*sizeof(uint32_t));
-    for(int i = 0; i < size; i++){
-        for (int j = 0; j < size; j++){
-            *(C + size*i + j) = 
-                i == j ? 1
-                        : 0;
-        }
-    }
-    if (k == 0) {
-        return C;
-    }
-    else if (k == 1) {
-        uint32_t* answer = matsum(C, n, size);
-        free(C);
-        return answer;
-    }
-    else if (k & 1) {
-        uint32_t* a = matsum(C, matpow(n, (k+1) >> 1, size), size);
-        uint32_t* b = powsum(n, (uint64_t) k>> 1, size);
-        free(C);
-        C = matmul(a, b, size);
-    }
-    else {
-        uint32_t* a = matpow(n, k, size);
-        uint32_t* b = powsum(n, (k -1), size);
-        free(C);
-        C = matsum(a, b, size);
-    }
-    return C;
+    return a.r < b.r;
 }
 
 int main() {
-	uint32_t n;
-    uint64_t k;
-
-    cin >> n >> k;
-    uint32_t* A = (uint32_t *) malloc(n*n*sizeof(uint32_t));
-
-    for(int i = 0 ; i < n; i++){
-        for(int j = 0; j < n; j++){
-            cin >> *(A + n*i + j);
-        }
+    int N, M;
+	uint32_t maxCore = 0, currentcore, currentr, currentprice;
+    int64_t currentrevenue;
+    ComputerOrTask currentComputerOrTask;
+    
+    cin >> N;
+    for(int i = 0; i < N; i++){
+        cin >> currentcore >> currentr >> currentprice;
+        currentComputerOrTask.core = currentcore;
+        currentComputerOrTask.r = currentr;
+        currentComputerOrTask.price = currentprice;
+        currentComputerOrTask.isComputer = true;
+        A.push_back(currentComputerOrTask);
     }
 
-    A = powsum(A, k, n);
-    //A = matmul(A, A, n);
+    cin >> M;
 
-    for(int i = 0 ; i < n; i++){
-        for(int j = 0; j < n; j++){
-            cout << *(A + n*i + j) << " ";
-        }
-        cout << endl;
+    for(int i = 0; i < M; i++){
+        cin >> currentcore >> currentr >> currentprice;
+        currentComputerOrTask.core = currentcore;
+        currentComputerOrTask.r = currentr;
+        currentComputerOrTask.price = currentprice;
+        currentComputerOrTask.isComputer = false;
+        A.push_back(currentComputerOrTask);
+        maxCore += currentcore;
     }
+
+    // currentrevenue 정렬해야 함
+    sort(A.begin(), A.end(), compareComputer);
+
+    int64_t* revenue = new int64_t[maxCore+1];
+    
+    int64_t min64 = numeric_limits<int64_t>::min();
+
+    for(int i = 1; i <= maxCore; i++){
+        revenue[i] = min64;
+    }
+    revenue[0] = 0;
+
+    for (vector<ComputerOrTask>::iterator it = A.begin() ; it != A.end(); ++it){
+        //cout << it->price << " " << it->r << endl;
+        if (it->isComputer){ // 컴퓨터는 필요한 코어 수를 감소시킬 것 -> 증가하는 방향으로
+            for(int i = 1; i <= maxCore; i++){
+                // 필요한 코어 수가 0 이하일 때는 굳이 컴퓨터를 살 이유가 없다
+
+                if(revenue[i] > min64){
+                    currentrevenue = revenue[i] - it->price;
+                    currentcore = it->core > i ? 0 : i - it->core;
+                    // 필요한 코어 수는 0 이상이어야만 함
+
+                    revenue[currentcore] = revenue[currentcore] > currentrevenue
+                        ? revenue[currentcore]
+                        : currentrevenue;
+                    // 이 상태에서의 수익 값 업데이트
+                }
+            }
+
+
+        } else { // 일은 필요한 코어 수를 증가시킬 것 -> 감소하는 방향으로
+            for(int i = maxCore; i >= 0; i--){
+                if(revenue[i] > min64){
+                    // 일을 하면 수익은 증가하지만 필요한 코어 수도 증가할 것이다
+                    currentrevenue = revenue[i] + it->price;
+                    currentcore = i + it->core;
+
+                    // 어쨋던 증가한 수익 업데이트
+                    revenue[currentcore] = revenue[currentcore] > currentrevenue
+                        ? revenue[currentcore]
+                        : currentrevenue;
+                }
+            }
+        }
+    }
+    // 더이상 코어가 새로 필요하지 않은 상태에서의 수익 값이 답이다
+    cout << revenue[0];
 }
