@@ -20,6 +20,8 @@ void report(std::vector<std::pair<int, int>> bridges) {
 	}
 }
 
+using namespace std;
+
 int main() {
 	int N;
 	std::cin >> N;
@@ -27,7 +29,7 @@ int main() {
 		/* this means your code is already wrong, exit immediately */
 		return 0;
 	}
-    
+
 	std::vector<std::pair<int, int>> answer;
 	int* youToLeftSeo = new int[N];
 	int* seoToRightYou = new int[N];
@@ -35,12 +37,13 @@ int main() {
 	int* seo = new int[N];
 
 	for(int i = 1; i <= N; i++){
-		youToLeftSeo[i] = sail(i,1);
+		youToLeftSeo[i] = sail(i,N);
 		seoToRightYou[i] = sail(N,i);
 	}
 
 	for(int i = 1; i < N; i++){
 		if (youToLeftSeo[i] == -1){
+			answer.push_back(make_pair(i,1));
 			seo[1] += 1;
 			you[i] = 1;
 			if (youToLeftSeo[i+1] != -1){
@@ -50,11 +53,10 @@ int main() {
 			you[i] = youToLeftSeo[i+1] - youToLeftSeo[i];
 		}
 	}
-    
 
 	for(int i = N; i > 1; i--){
 		if (seoToRightYou[i] == -1){
-			//if(i == N) answer.push_back(std::make_pair(N,i)); // 마지막 종료 조건 때문에 이 경우 체크 못 하기 때문
+			answer.push_back(make_pair(N,i));
 			you[N] += 1;
 			seo[i] = 1;
 			if (seoToRightYou[i-1] != -1){
@@ -65,24 +67,29 @@ int main() {
 		}
 	}
 
-    if(youToLeftSeo[N] == -1 && seoToRightYou[1] == -1){
-        seo[1] += 1;
-        you[N] += 1;
-    }
+	for(int i = 1; i <= N; i++){
+		cerr << you[i] << " ";
+	}
+	cout << endl;
+	for(int i = 1; i <= N; i++){
+		cerr << seo[i] << " ";
+	}
+	cout << endl;
 	
-    int sp = 1, yp = 1;
-    while(sp <= N || yp <= N){
-        while(you[yp] == 0) yp++;
-        while(seo[sp] == 0) sp++;
-
-        if(sp <= N && yp <= N) {
-            answer.push_back(std::make_pair(yp,sp));
-            //std::cerr << yp << " " << sp << std::endl;
-        }
-        you[yp]--; seo[sp]--;
-    }
-
+	
+	for(int i = 1; i <= N; i++) {
+		if(sail(i, i) == -1) {
+			answer.push_back(std::make_pair(i, i));
+		}
+	}
 	report(answer);
+
+	/* IMPLEMENT HERE */
+	/* IMPLEMENT HERE */
+	/* IMPLEMENT HERE */
+	/* IMPLEMENT HERE */
+	/* IMPLEMENT HERE */
+	/* IMPLEMENT HERE */
 	
 	return 0;
 }

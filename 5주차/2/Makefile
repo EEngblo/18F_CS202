@@ -1,10 +1,10 @@
-ALL = main run
+ALL = main
 
 all : $(ALL)
 test : $(ALL)
 
-main : Main.cpp
-	g++-7 -Wall -lm -static -DEVAL -g -o Main -O2 Main.cpp -std=c++11
+main : chaltteok.cpp
+	g++-7 -Wall -lm -static -DEVAL -g -o chaltteok -O2 chaltteok.cpp -std=c++11
 
-run : Main
-	./Main < test.txt
+backup: chaltteok2.cpp
+	g++-7 -Wall -lm -static -DEVAL -g -o chaltteok -O2 chaltteok2.cpp -std=c++11
