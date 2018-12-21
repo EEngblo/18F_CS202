@@ -1,107 +1,88 @@
 #include <iostream>
-#include <algorithm>
-#include <utility>
-#include <vector>
-#include <deque>
-#include <queue>
-#include <map>
-#include <functional>
-#include <set>
 #include <string>
-#define DEBUG 0
+#include <vector>
+#include <cstdlib>
 
-using namespace std;
+int sail(int a, int b) {
+	std::cout << "? " << a << " " << b << std::endl << std::flush;
+	int v; std::cin >> v;
+	if(v == -202) {
+		exit(0);
+	}
+	return v;
+}
 
-typedef struct _ComputerOrTask {
-    int32_t r;
-    int32_t price;
-    int32_t core; 
-    bool isComputer;
-} ComputerOrTask;
-
-vector<ComputerOrTask> A;
-
-bool compareComputer(const ComputerOrTask& a, const ComputerOrTask& b){
-    if (a.r == b.r){
-        return a.isComputer < b.isComputer;
-    }
-    return a.r < b.r;
+void report(std::vector<std::pair<int, int>> bridges) {
+	std::cout << "!" << std::endl << std::flush;
+	std::cout << bridges.size() << std::endl << std::flush;
+	for(size_t i = 0; i < bridges.size(); i++) {
+		std::cout << bridges[i].first << " " << bridges[i].second << std::endl << std::flush;
+	}
 }
 
 int main() {
-    int N, M;
-	uint32_t maxCore = 0, currentcore, currentr, currentprice;
-    int64_t currentrevenue;
-    ComputerOrTask currentComputerOrTask;
+	int N;
+	std::cin >> N;
+	if(N < 0) {
+		/* this means your code is already wrong, exit immediately */
+		return 0;
+	}
     
-    cin >> N;
-    for(int i = 0; i < N; i++){
-        cin >> currentcore >> currentr >> currentprice;
-        currentComputerOrTask.core = currentcore;
-        currentComputerOrTask.r = currentr;
-        currentComputerOrTask.price = currentprice;
-        currentComputerOrTask.isComputer = true;
-        A.push_back(currentComputerOrTask);
-    }
+	std::vector<std::pair<int, int>> answer;
+	int* youToLeftSeo = new int[N];
+	int* seoToRightYou = new int[N];
+	int* you = new int[N];
+	int* seo = new int[N];
 
-    cin >> M;
+	for(int i = 1; i <= N; i++){
+		youToLeftSeo[i] = sail(i,1);
+		seoToRightYou[i] = sail(N,i);
+	}
 
-    for(int i = 0; i < M; i++){
-        cin >> currentcore >> currentr >> currentprice;
-        currentComputerOrTask.core = currentcore;
-        currentComputerOrTask.r = currentr;
-        currentComputerOrTask.price = currentprice;
-        currentComputerOrTask.isComputer = false;
-        A.push_back(currentComputerOrTask);
-        maxCore += currentcore;
-    }
-
-    // currentrevenue 정렬해야 함
-    sort(A.begin(), A.end(), compareComputer);
-
-    int64_t* revenue = new int64_t[maxCore+1];
+	for(int i = 1; i < N; i++){
+		if (youToLeftSeo[i] == -1){
+			seo[1] += 1;
+			you[i] = 1;
+			if (youToLeftSeo[i+1] != -1){
+				you[i] += youToLeftSeo[i+1];
+			}
+		} else if (youToLeftSeo[i+1] != -1){
+			you[i] = youToLeftSeo[i+1] - youToLeftSeo[i];
+		}
+	}
     
-    int64_t min64 = numeric_limits<int64_t>::min();
 
-    for(int i = 1; i <= maxCore; i++){
-        revenue[i] = min64;
+	for(int i = N; i > 1; i--){
+		if (seoToRightYou[i] == -1){
+			//if(i == N) answer.push_back(std::make_pair(N,i)); // 마지막 종료 조건 때문에 이 경우 체크 못 하기 때문
+			you[N] += 1;
+			seo[i] = 1;
+			if (seoToRightYou[i-1] != -1){
+				seo[i] += seoToRightYou[i-1];
+			}
+		} else if (seoToRightYou[i-1] != -1){
+			seo[i] = seoToRightYou[i-1] - seoToRightYou[i];
+		}
+	}
+
+    if(youToLeftSeo[N] == -1 && seoToRightYou[1] == -1){
+        seo[1] += 1;
+        you[N] += 1;
     }
-    revenue[0] = 0;
+	
+    int sp = 1, yp = 1;
+    while(sp <= N || yp <= N){
+        while(you[yp] == 0) yp++;
+        while(seo[sp] == 0) sp++;
 
-    for (vector<ComputerOrTask>::iterator it = A.begin() ; it != A.end(); ++it){
-        //cout << it->price << " " << it->r << endl;
-        if (it->isComputer){ // 컴퓨터는 필요한 코어 수를 감소시킬 것 -> 증가하는 방향으로
-            for(int i = 1; i <= maxCore; i++){
-                // 필요한 코어 수가 0 이하일 때는 굳이 컴퓨터를 살 이유가 없다
-
-                if(revenue[i] > min64){
-                    currentrevenue = revenue[i] - it->price;
-                    currentcore = it->core > i ? 0 : i - it->core;
-                    // 필요한 코어 수는 0 이상이어야만 함
-
-                    revenue[currentcore] = revenue[currentcore] > currentrevenue
-                        ? revenue[currentcore]
-                        : currentrevenue;
-                    // 이 상태에서의 수익 값 업데이트
-                }
-            }
-
-
-        } else { // 일은 필요한 코어 수를 증가시킬 것 -> 감소하는 방향으로
-            for(int i = maxCore; i >= 0; i--){
-                if(revenue[i] > min64){
-                    // 일을 하면 수익은 증가하지만 필요한 코어 수도 증가할 것이다
-                    currentrevenue = revenue[i] + it->price;
-                    currentcore = i + it->core;
-
-                    // 어쨋던 증가한 수익 업데이트
-                    revenue[currentcore] = revenue[currentcore] > currentrevenue
-                        ? revenue[currentcore]
-                        : currentrevenue;
-                }
-            }
+        if(sp <= N && yp <= N) {
+            answer.push_back(std::make_pair(yp,sp));
+            //std::cerr << yp << " " << sp << std::endl;
         }
+        you[yp]--; seo[sp]--;
     }
-    // 더이상 코어가 새로 필요하지 않은 상태에서의 수익 값이 답이다
-    cout << revenue[0];
+
+	report(answer);
+	
+	return 0;
 }

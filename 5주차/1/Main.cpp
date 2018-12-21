@@ -1,88 +1,134 @@
 #include <iostream>
-#include <algorithm>
-#include <utility>
-#include <vector>
-#include <deque>
-#include <queue>
-#include <map>
-#include <functional>
-#include <set>
 #include <string>
+#include <vector>
+#include <cstdlib>
+#include <algorithm>
 
-using namespace std;
-
-#define DEBUG 0
-#define m 987654321
-#define sum(X, Y) (X + Y)
-#define add(X, Y) (((X % m) + (Y % m)) % m)
-#define sub(X, Y) (((X % m) - (Y % m) + m) % m)
-#define mul(X, Y) (((uint64_t) (X % m) * (Y % m)) % m)
-#define div(X, Y) (((X % m) / (Y % m)) % m)
-
-uint64_t pow(uint64_t n, uint32_t k){
-    if (k == 0) return 1;
-    if (k == 1) return n % m;
-    uint64_t a = pow(n, k >> 1);
-    if (k & 1){
-        return mul(n, mul(a, a));
-    }
-    return mul(a, a);
+char weigh(int x, int y) {
+	std::cout << "? " << x << " " << y << std::endl << std::flush;
+	std::string s; std::cin >> s;
+	if(s == "-202") {
+		exit(0);
+	}
+	return s[0];
 }
-uint32_t pow2(uint64_t c, uint32_t k){
-    uint64_t answer = c % m;
 
-    for(int i = 1; i < k; i++){
-        answer *= c % m;
-        answer %= m;
-    }
-    return answer;
+void report(std::vector<int> minPos, std::vector<int> maxPos) {
+	std::cout << "!" << std::endl;
+	std::cout << minPos.size();
+	for(size_t i = 0; i < minPos.size(); i++) 
+		std::cout << " " << minPos[i];
+	std::cout << std::endl << maxPos.size();
+	for(size_t i = 0; i < maxPos.size(); i++) 
+		std::cout << " " << maxPos[i];
+	std::cout << std::endl << std::flush;
 }
 
 int main() {
-    int n, j;
-	uint32_t minA = UINT32_MAX, maxA = 0;
-    uint64_t c;
-    uint64_t cnt = 0;
-    bool emptyrow = true;
-    cin >> n;
+	int T; std::cin >> T;
+	for(int test_case_id = 1; test_case_id <= T; test_case_id++) {		
+		int N;
+		std::cin >> N;
+		if(N < 0) {
+			/* this means your code is already wrong, exit immediately */
+			return 0;
+		}
 
-    vector<uint8_t> I;
+		/* IMPLEMENT HERE */
+		/* IMPLEMENT HERE */
+		/* IMPLEMENT HERE */
+		/* IMPLEMENT HERE */
+		// Below is an example solution that requires N(N-1) weighings.
+		// Don't forget to initialize all global variables.
 
-    for(int i = 0; i < n; i++){
-        cin >> c;
-        I.push_back(c);
-    }
+		std::vector<int> minPos, maxPos, tempPos;
+		char resp;
 
-    cin >> c;
+        if(N & 1){
+            minPos.push_back(N);
+			maxPos.push_back(N);
+			N -= 1;
+        } else {
+			resp = weigh(N, N-1);
+			if(resp == '>'){
+				maxPos.push_back(N);
+				minPos.push_back(N-1);
+			} else if(resp == '<'){
+				maxPos.push_back(N-1);
+				minPos.push_back(N);
+			} else {
+				maxPos.push_back(N);
+				maxPos.push_back(N-1);
+				minPos.push_back(N);
+				minPos.push_back(N-1);
+			}
 
-    sort(I.begin(), I.end());
+			N -= 2;
+        }     
 
-    uint32_t** A = new uint32_t*[n+1];
-    uint32_t** B = new uint32_t*[n+1];
-    uint32_t yMax = c > I[n-1] ? c : I[n-1];
+		for(int n = 2; n <= N; n+=2){
+			resp = weigh(n, n-1);
+			if(resp == '>'){
+				resp = weigh(n, maxPos[0]);
+				if(resp == '>'){
+					maxPos.clear();
+					maxPos.push_back(n);
+				} else if(resp == '='){
+					maxPos.push_back(n);
+				}
 
-    for(int i = 0; i <= n ; i++){
-        A[i] = new uint32_t[yMax];
-        B[i] = new uint32_t[yMax];
-    }
-    
-    A[0][0] = 1;
-    for(int i = 0; i < n; i++){
-        uint32_t current = I[i];
-        for(int j = c-1; j >= current; j--){
-            A[1][j] = add(A[1][j], A[0][j-current]);
-            A[0][j] = add(A[0][j], A[1][j-current]);
-        }
-    }
+				resp = weigh(n-1, minPos[0]);
+				if(resp == '<'){
+					minPos.clear();
+					minPos.push_back(n-1);
+				} else if (resp == '='){
+					minPos.push_back(n-1);
+				}
+				
+			} else if(resp == '<'){
+				resp = weigh(n-1, maxPos[0]);
+				if(resp == '>'){
+					maxPos.clear();
+					maxPos.push_back(n-1);
+				} else if(resp == '='){
+					maxPos.push_back(n-1);
+				}
 
-    uint64_t v = pow2(c, n);
+				resp = weigh(n, minPos[0]);
+				if(resp == '<'){
+					minPos.clear();
+					minPos.push_back(n);
+				} else if (resp == '='){
+					minPos.push_back(n);
+				}
+			} else {
+				resp = weigh(n-1, maxPos[0]);
+				if(resp == '>'){
+					maxPos.clear();
+					maxPos.push_back(n-1);
+					maxPos.push_back(n);
+				} else if(resp == '='){
+					maxPos.push_back(n-1);
+					maxPos.push_back(n);
+				}
 
-    for(int k = 1; k < c; k++){
-        uint32_t tv = mul(A[0][k], pow2(c-k, n));
-        v = add(v, tv);
-        tv = mul(A[1][k], pow2(c-k, n));
-        v = sub(v, tv);
-    }
+				resp = weigh(n, minPos[0]);
+				if(resp == '<'){
+					minPos.clear();
+					minPos.push_back(n-1);
+					minPos.push_back(n);
+				} else if (resp == '='){
+					minPos.push_back(n-1);
+					minPos.push_back(n);
+				}
+			}
+		}
 
-    cout << v;
+		report(minPos, maxPos);
+		/* IMPLEMENT HERE */
+
+		/* IMPLEMENT HERE */
+
+	}
+	return 0;
 }
